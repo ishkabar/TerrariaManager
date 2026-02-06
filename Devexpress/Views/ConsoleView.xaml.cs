@@ -19,9 +19,25 @@ public partial class ConsoleView : UserControl
 
     private void CommandInput_KeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Enter && DataContext is ConsoleViewModel vm && vm.SendCommand.CanExecute(null))
+        if (DataContext is not ConsoleViewModel vm)
+            return;
+
+        if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.Control)
         {
-            vm.SendCommand.Execute(null);
+            if (vm.SayCommand.CanExecute(null))
+            {
+                vm.SayCommand.Execute(null);
+                e.Handled = true;
+            }
+        }
+
+        else if (e.Key == Key.Enter)
+        {
+            if (vm.SendCommand.CanExecute(null))
+            {
+                vm.SendCommand.Execute(null);
+                e.Handled = true;
+            }
         }
     }
 

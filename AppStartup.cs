@@ -46,7 +46,9 @@ public static class AppStartup
 
         // Views
         builder.Services.AddTransient<LoginView>();
+        builder.Services.AddTransient<MainView>();
         builder.Services.AddTransient<ConsoleView>();
+        builder.Services.AddTransient<CommandsView>();
         builder.Services.AddTransient<SettingsView>();
         builder.Services.AddTransient<UpdateRequiredView>();
 

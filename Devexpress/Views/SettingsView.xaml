@@ -14,9 +14,21 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            
+
+            <!-- Buttons -->
+            <StackPanel Grid.Row="0"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+                <dx:SimpleButton Content="Save"
+                                 Command="{Binding SaveCommand}"
+                                 Style="{StaticResource PrimaryButton}"
+                                 Height="40"
+                                 MinWidth="120"
+                                 Margin="0,0,10,0"/>
+            </StackPanel>
+
             <!-- SSH Settings -->
-            <GroupBox Grid.Row="0" 
+            <GroupBox Grid.Row="1"
                      Header="SSH Connection"
                      Foreground="White"
                      BorderBrush="#3e3e42"
@@ -75,7 +87,7 @@
             </GroupBox>
             
             <!-- Ogur.Hub Settings -->
-            <GroupBox Grid.Row="1" 
+            <GroupBox Grid.Row="2"
                      Header="Ogur.Hub Authentication"
                      Foreground="White"
                      BorderBrush="#3e3e42"
@@ -94,7 +106,7 @@
             </GroupBox>
             
             <!-- UI Settings -->
-            <GroupBox Grid.Row="2" 
+            <GroupBox Grid.Row="3"
                      Header="User Interface"
                      Foreground="White"
                      BorderBrush="#3e3e42"
@@ -125,24 +137,8 @@
                     
                 </dxlc:LayoutControl>
             </GroupBox>
-            
-            <!-- Buttons -->
-            <StackPanel Grid.Row="3"
-                       Orientation="Horizontal"
-                       HorizontalAlignment="Right">
-                <dx:SimpleButton Content="Save"
-                                Command="{Binding SaveCommand}"
-                                Style="{StaticResource PrimaryButton}"
-                                Height="40"
-                                MinWidth="120"
-                                Margin="0,0,10,0"/>
-                
-                <dx:SimpleButton Content="Back"
-                                Command="{Binding BackCommand}"
-                                Style="{StaticResource SecondaryButton}"
-                                Height="40"
-                                MinWidth="120"/>
-            </StackPanel>
+
+
         </Grid>
     </ScrollViewer>
 </UserControl>

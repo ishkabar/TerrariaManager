@@ -16,24 +16,15 @@ public partial class ShellWindow : Window
     {
         if (e.ChangedButton == MouseButton.Left)
         {
-            try
-            {
-                DragMove();
-            }
-            catch { }
+            try { DragMove(); } catch { }
         }
     }
 
     private void Border_MouseDown(object sender, MouseButtonEventArgs e)
     {
-        // Allow dragging from anywhere
         if (e.ChangedButton == MouseButton.Left && e.ClickCount == 1)
         {
-            try
-            {
-                DragMove();
-            }
-            catch { }
+            try { DragMove(); } catch { }
         }
     }
 

@@ -143,6 +143,7 @@ public class SshService : IDisposable
 
         var reader = new StreamReader(_shellStream, Encoding.UTF8);
         var buffer = new char[1024];
+        var skipFirstOutput = true;
 
         try
         {
@@ -162,6 +163,17 @@ public class SshService : IDisposable
                     output = StripAnsiCodes(output);
                     Console.WriteLine($"📥 CLEANED: {output}");
 
+                    if (skipFirstOutput && output.Contains("docker attach"))
+                {
+                    skipFirstOutput = false;
+
+                    // Send welcome message
+                    OutputReceived?.Invoke(this, "\n╔══════════════════════════════════════╗\n");
+                    OutputReceived?.Invoke(this, "║   ✨ WITAJ NA SERWERZE FIRMY ✨     ║\n");
+                    OutputReceived?.Invoke(this, "╚══════════════════════════════════════╝\n\n");
+                    continue; // Skip docker attach line
+                }
+
                     if (!string.IsNullOrWhiteSpace(output))
                     {
                         OutputReceived?.Invoke(this, output);
@@ -171,6 +183,7 @@ public class SshService : IDisposable
                 await Task.Delay(50, cancellationToken);
             }
         }
+        catch (OperationCanceledException) { }
         catch (Exception ex)
         {
             Console.WriteLine($"❌ Read loop error: {ex}");

@@ -15,7 +15,7 @@ public class AppSettings
     );
 
     // Ogur.Hub settings
-    public string ApiUrl { get; set; } = "https://respy.ogur.dev";
+    public string ApiUrl { get; set; } = "https://api.ogur.dev";
     public string Username { get; set; } = "";
     public string HashedPassword { get; set; } = "";
 
@@ -24,7 +24,7 @@ public class AppSettings
     public int SshPort { get; set; } = 22;
     public string SshUsername { get; set; } = "";
     public string SshPasswordHash { get; set; } = "";
-    //public string DockerContainer { get; set; } = "terraria";
+
     public string ContainerName { get; set; } = "terraria";
 
     public bool AutoConnect { get; set; } = false;

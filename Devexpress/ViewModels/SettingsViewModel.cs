@@ -1,3 +1,4 @@
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Ogur.Terraria.Manager.Infrastructure.Config;
@@ -52,7 +53,7 @@ public partial class SettingsViewModel : ObservableObject
             _settings.SetSshPassword(SshPassword);
         }
 
-        _settings.ContainerName = ContainerName; // ← POPRAW TO
+        _settings.ContainerName = ContainerName;
         _settings.ApiUrl = ApiUrl;
         _settings.FontSize = FontSize;
         _settings.ShowTimestamps = ShowTimestamps;
@@ -61,19 +62,20 @@ public partial class SettingsViewModel : ObservableObject
 
         _settings.Save();
 
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            if (Application.Current.MainWindow is ShellWindow window)
+            {
+                window.Topmost = _settings.AlwaysOnTop;
+            }
+        });
+
         DevExpress.Xpf.Core.DXMessageBox.Show(
+            Application.Current.MainWindow,
             "Settings saved successfully!",
             "Settings",
             System.Windows.MessageBoxButton.OK,
             System.Windows.MessageBoxImage.Information
         );
-
-        _navigation.NavigateToConsoleWithReload();
-    }
-
-    [RelayCommand]
-    private void Back()
-    {
-        _navigation.NavigateTo<ConsoleView>();
     }
 }

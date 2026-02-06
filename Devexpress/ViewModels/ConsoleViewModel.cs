@@ -8,6 +8,7 @@ using DevExpress.Mvvm;
 using Ogur.Terraria.Manager.Core.Models;
 using Ogur.Terraria.Manager.Infrastructure.Services;
 using Ogur.Terraria.Manager.Infrastructure.Config;
+using Ogur.Terraria.Manager.Devexpress.Views;
 
 namespace Ogur.Terraria.Manager.Devexpress.ViewModels;
 
@@ -22,6 +23,10 @@ public class ConsoleViewModel : ViewModelBase, IDisposable
     private bool _isConnecting;
     private string _statusText = "Disconnected";
     private Visibility _commandButtonsVisibility = Visibility.Collapsed;
+    public ObservableCollection<ServerCommand> TimeCommands { get; }
+    public ObservableCollection<ServerCommand> ServerCommands { get; }
+    public ObservableCollection<ServerCommand> AdminCommands { get; }
+
 
     public ObservableCollection<ServerCommand> Commands { get; }
 
@@ -30,11 +35,15 @@ public class ConsoleViewModel : ViewModelBase, IDisposable
         _sshService = sshService;
         _settings = settings;
 
-        Commands = new ObservableCollection<ServerCommand>();
-        foreach (var cmd in ServerCommand.GetDefaultCommands())
-        {
-            Commands.Add(cmd);
-        }
+        var allCommands = ServerCommand.GetDefaultCommands();
+
+        Commands = new ObservableCollection<ServerCommand>(allCommands);
+        TimeCommands = new ObservableCollection<ServerCommand>(allCommands.Where(c => c.Category == "Time"));
+        ServerCommands = new ObservableCollection<ServerCommand>(allCommands.Where(c => c.Category == "Server"));
+        AdminCommands = new ObservableCollection<ServerCommand>(allCommands.Where(c => c.Category == "Admin"));
+
+
+        //foreach (var cmd in ServerCommand.GetDefaultCommands()) { Commands.Add(cmd); }
 
         _sshService.OutputReceived += OnOutputReceived;
         _sshService.ConnectionStateChanged += OnConnectionStateChanged;
@@ -43,6 +52,7 @@ public class ConsoleViewModel : ViewModelBase, IDisposable
         ConnectCommand = new DelegateCommand(async () => await ConnectAsync(), () => !_isConnecting);
         DisconnectCommand = new DelegateCommand(Disconnect, () => _isConnected);
         SendCommand = new DelegateCommand(async () => await SendCommandAsync(), () => _isConnected);
+        SayCommand = new DelegateCommand(async () => await SendSayCommandAsync(), () => _isConnected); // ← DODAJ
         ExecuteServerCommand = new DelegateCommand<ServerCommand>(async cmd => await ExecuteCommand(cmd));
         ClearConsoleCommand = new DelegateCommand(ClearConsole);
 
@@ -108,6 +118,7 @@ public class ConsoleViewModel : ViewModelBase, IDisposable
     public ICommand ConnectCommand { get; }
     public ICommand DisconnectCommand { get; }
     public ICommand SendCommand { get; }
+    public ICommand SayCommand { get; }
     public ICommand ExecuteServerCommand { get; }
     public ICommand ClearConsoleCommand { get; }
 
@@ -127,7 +138,7 @@ public class ConsoleViewModel : ViewModelBase, IDisposable
 
     private async Task ConnectAsync()
     {
-        if (string.IsNullOrEmpty(_settings.SshHost) || 
+        if (string.IsNullOrEmpty(_settings.SshHost) ||
             string.IsNullOrEmpty(_settings.SshUsername))
         {
             AppendOutput("❌ SSH settings not configured. Go to Settings.\n");
@@ -154,9 +165,8 @@ public class ConsoleViewModel : ViewModelBase, IDisposable
 
         if (connected)
         {
-            Console.WriteLine($"🔍 DEBUG: ContainerName = '{_settings.ContainerName}'");
-            AppendOutput($"🐋 Attaching to Docker container '{_settings.ContainerName}'...\n");
             AppendOutput("✅ SSH connected!\n");
+            AppendOutput($"🐋 Attaching to Docker container '{_settings.ContainerName}'...\n");
 
 
             var attached = await _sshService.AttachToDockerAsync(_settings.ContainerName);
@@ -227,8 +237,65 @@ public class ConsoleViewModel : ViewModelBase, IDisposable
         if (command == null)
             return;
 
-        AppendOutput($"> {command.Command}\n");
-        await _sshService.SendCommandAsync(command.Command);
+        string? inputValue = null;
+
+        // Step 1: Input dialog (jeśli potrzebny)
+        if (command.RequiresInput)
+        {
+            System.Media.SystemSounds.Asterisk.Play(); // ← Dźwięk powiadomienia
+
+            var inputDialog = new InputDialog(command.Name, command.InputPrompt)
+            {
+                Owner = Application.Current.MainWindow
+            };
+
+            inputDialog.ShowDialog();
+
+            if (!inputDialog.WasConfirmed || string.IsNullOrWhiteSpace(inputDialog.InputValue))
+                return;
+
+            inputValue = inputDialog.InputValue;
+        }
+
+        // Step 2: Confirmation (jeśli potrzebny)
+        if (command.RequiresConfirm)
+        {
+            System.Media.SystemSounds.Exclamation.Play(); // ← Mocniejszy dźwięk ostrzeżenia
+
+            var result = DevExpress.Xpf.Core.DXMessageBox.Show(
+                Application.Current.MainWindow,
+                command.ConfirmMessage,
+                "Confirm Action",
+                System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Warning
+            );
+
+            if (result != System.Windows.MessageBoxResult.Yes)
+                return;
+        }
+
+        // Step 3: Execute command
+        var fullCommand = command.Command;
+        if (!string.IsNullOrWhiteSpace(inputValue))
+        {
+            fullCommand = command.Command + " " + inputValue;
+        }
+
+        AppendOutput($"> {fullCommand}\n");
+        await _sshService.SendCommandAsync(fullCommand);
+    }
+
+    private async Task SendSayCommandAsync()
+    {
+        if (string.IsNullOrWhiteSpace(CommandInput))
+            return;
+
+        var message = CommandInput.Trim();
+        var fullCommand = "say " + message;
+        AppendOutput($"> {fullCommand}\n");
+
+        await _sshService.SendCommandAsync(fullCommand);
+        CommandInput = "";
     }
 
     private void ClearConsole()
@@ -242,10 +309,7 @@ public class ConsoleViewModel : ViewModelBase, IDisposable
 
     private void OnOutputReceived(object? sender, string output)
     {
-        Application.Current.Dispatcher.Invoke(() =>
-        {
-            AppendOutput(output);
-        });
+        Application.Current.Dispatcher.Invoke(() => { AppendOutput(output); });
     }
 
     private void OnConnectionStateChanged(object? sender, bool isConnected)

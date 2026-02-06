@@ -9,6 +9,7 @@
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         AllowsTransparency="True"
+        Topmost="{Binding AlwaysOnTop}"
         Background="Transparent"
         ResizeMode="CanResizeWithGrip">
 
@@ -33,7 +34,6 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Left - Logo and Title -->
                 <StackPanel Grid.Column="0"
                             Orientation="Horizontal"
                             Margin="15,0"
@@ -50,7 +50,6 @@
                                VerticalAlignment="Center"/>
                 </StackPanel>
 
-                <!-- Right - Buttons -->
                 <StackPanel Grid.Column="1"
                             Orientation="Horizontal"
                             HorizontalAlignment="Right"
@@ -68,7 +67,7 @@
                 </StackPanel>
             </Grid>
 
-            <!-- Content -->
+            <!-- Content - CurrentView albo TabControl -->
             <ContentControl Grid.Row="1" Content="{Binding CurrentView}" />
         </Grid>
     </Border>

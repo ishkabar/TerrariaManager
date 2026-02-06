@@ -54,17 +54,6 @@ public partial class LoginViewModel : ObservableObject
         _authService = authService;
         _licenseValidator = licenseValidator;
         _messenger = messenger;
-
-        // TODO: HARDCODED DEBUG CREDENTIALS - USUŃ W PRODUKCJI
-        Username = "test123";
-        Password = "test123";
-
-        // Auto-login po 500ms
-        _ = Task.Run(async () =>
-        {
-            await Task.Delay(500);
-            await LoginAsync(CancellationToken.None);
-        });
     }
 
     partial void OnUsernameChanged(string? value)

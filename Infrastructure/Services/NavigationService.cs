@@ -37,14 +37,16 @@ public class NavigationService : INavigationService
     {
         Application.Current.Dispatcher.Invoke(() =>
         {
-            var view = _serviceProvider.GetRequiredService<ConsoleView>();
-
-            if (view.DataContext is ConsoleViewModel vm)
+            // Reload settings first
+            var consoleView = _serviceProvider.GetRequiredService<ConsoleView>();
+            if (consoleView.DataContext is ConsoleViewModel vm)
             {
                 vm.ReloadSettings();
             }
 
-            _messenger.Send(new NavigationMessage { View = view });
+            // Navigate to MainView (with tabs)
+            var mainView = _serviceProvider.GetRequiredService<MainView>();
+            _messenger.Send(new NavigationMessage { View = mainView });
         });
     }
 }

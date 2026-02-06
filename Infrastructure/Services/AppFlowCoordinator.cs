@@ -54,7 +54,7 @@ public class AppFlowCoordinator : IAppFlowCoordinator
         _messenger.Register<LoginSucceededMessage>(this, (r, m) =>
         {
             _logger.LogInformation("Login succeeded for {Username}", m.Username);
-            _navigation.NavigateTo<ConsoleView>();
+            _navigation.NavigateTo<MainView>(); // ← ZMIEŃ z ConsoleView na MainView
         });
 
         // Navigate to login
