@@ -1,0 +1,26 @@
+﻿# Build
+bin/
+obj/
+publish/
+
+# IDE - Visual Studio
+.vs/
+*.user
+*.suo
+*.cache
+*.DotSettings.user
+
+# IDE - JetBrains Rider
+.idea/
+
+# NuGet
+packages/
+*.nupkg
+
+# Local config
+appsettings.local.json
+settings.json
+
+# OS
+Thumbs.db
+.DS_Store

@@ -1,0 +1,148 @@
+<UserControl x:Class="Ogur.Terraria.Manager.Devexpress.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+             xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+             xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"
+             Background="#1e1e1e">
+    
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+            <!-- SSH Settings -->
+            <GroupBox Grid.Row="0" 
+                     Header="SSH Connection"
+                     Foreground="White"
+                     BorderBrush="#3e3e42"
+                     Margin="0,0,0,15">
+                <dxlc:LayoutControl Orientation="Vertical" Margin="10">
+                    
+                    <dxlc:LayoutItem Label="Host" LabelPosition="Top" Margin="0,0,0,10">
+                        <dxe:TextEdit EditValue="{Binding SshHost, Mode=TwoWay}"
+                                     Background="#2d2d30"
+                                     Foreground="White"
+                                     BorderBrush="#3e3e42"
+                                     Height="32"/>
+                    </dxlc:LayoutItem>
+                    
+                    <dxlc:LayoutItem Label="Port" LabelPosition="Top" Margin="0,0,0,10">
+                        <dxe:SpinEdit EditValue="{Binding SshPort, Mode=TwoWay}"
+                                     MinValue="1"
+                                     MaxValue="65535"
+                                     Background="#2d2d30"
+                                     Foreground="White"
+                                     BorderBrush="#3e3e42"
+                                     Height="32"/>
+                    </dxlc:LayoutItem>
+                    
+                    <dxlc:LayoutItem Label="Username" LabelPosition="Top" Margin="0,0,0,10">
+                        <dxe:TextEdit EditValue="{Binding SshUsername, Mode=TwoWay}"
+                                     Background="#2d2d30"
+                                     Foreground="White"
+                                     BorderBrush="#3e3e42"
+                                     Height="32"/>
+                    </dxlc:LayoutItem>
+                    
+                    <dxlc:LayoutItem Label="Password" LabelPosition="Top" Margin="0,0,0,10">
+                        <dxe:PasswordBoxEdit EditValue="{Binding SshPassword, Mode=TwoWay}"
+                                            Background="#2d2d30"
+                                            Foreground="White"
+                                            BorderBrush="#3e3e42"
+                                            Height="32"/>
+                    </dxlc:LayoutItem>
+                    
+                    <dxlc:LayoutItem Label="Container Name" LabelPosition="Top" Margin="0,0,0,10">
+                        <dxe:TextEdit EditValue="{Binding ContainerName, Mode=TwoWay}"
+                                      Background="#2d2d30"
+                                      Foreground="White"
+                                      BorderBrush="#3e3e42"
+                                      Height="32"/>
+                    </dxlc:LayoutItem>
+
+                    <dxlc:LayoutItem>
+                        <CheckBox Content="Auto-connect on startup"
+                                  IsChecked="{Binding AutoConnect, Mode=TwoWay}"
+                                  Foreground="White"/>
+                    </dxlc:LayoutItem>
+                    
+                </dxlc:LayoutControl>
+            </GroupBox>
+            
+            <!-- Ogur.Hub Settings -->
+            <GroupBox Grid.Row="1" 
+                     Header="Ogur.Hub Authentication"
+                     Foreground="White"
+                     BorderBrush="#3e3e42"
+                     Margin="0,0,0,15">
+                <dxlc:LayoutControl Orientation="Vertical" Margin="10">
+                    
+                    <dxlc:LayoutItem Label="API URL" LabelPosition="Top" Margin="0,0,0,10">
+                        <dxe:TextEdit EditValue="{Binding ApiUrl, Mode=TwoWay}"
+                                     Background="#2d2d30"
+                                     Foreground="White"
+                                     BorderBrush="#3e3e42"
+                                     Height="32"/>
+                    </dxlc:LayoutItem>
+                    
+                </dxlc:LayoutControl>
+            </GroupBox>
+            
+            <!-- UI Settings -->
+            <GroupBox Grid.Row="2" 
+                     Header="User Interface"
+                     Foreground="White"
+                     BorderBrush="#3e3e42"
+                     Margin="0,0,0,15">
+                <dxlc:LayoutControl Orientation="Vertical" Margin="10">
+                    
+                    <dxlc:LayoutItem Label="Console Font Size" LabelPosition="Top" Margin="0,0,0,10">
+                        <dxe:SpinEdit EditValue="{Binding FontSize, Mode=TwoWay}"
+                                     MinValue="8"
+                                     MaxValue="24"
+                                     Background="#2d2d30"
+                                     Foreground="White"
+                                     BorderBrush="#3e3e42"
+                                     Height="32"/>
+                    </dxlc:LayoutItem>
+                    
+                    <dxlc:LayoutItem Margin="0,0,0,10">
+                        <CheckBox Content="Show Timestamps"
+                                 IsChecked="{Binding ShowTimestamps, Mode=TwoWay}"
+                                 Foreground="White"/>
+                    </dxlc:LayoutItem>
+                    
+                    <dxlc:LayoutItem>
+                        <CheckBox Content="Always on Top"
+                                 IsChecked="{Binding AlwaysOnTop, Mode=TwoWay}"
+                                 Foreground="White"/>
+                    </dxlc:LayoutItem>
+                    
+                </dxlc:LayoutControl>
+            </GroupBox>
+            
+            <!-- Buttons -->
+            <StackPanel Grid.Row="3"
+                       Orientation="Horizontal"
+                       HorizontalAlignment="Right">
+                <dx:SimpleButton Content="Save"
+                                Command="{Binding SaveCommand}"
+                                Style="{StaticResource PrimaryButton}"
+                                Height="40"
+                                MinWidth="120"
+                                Margin="0,0,10,0"/>
+                
+                <dx:SimpleButton Content="Back"
+                                Command="{Binding BackCommand}"
+                                Style="{StaticResource SecondaryButton}"
+                                Height="40"
+                                MinWidth="120"/>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

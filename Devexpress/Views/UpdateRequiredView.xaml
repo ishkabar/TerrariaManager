@@ -1,0 +1,167 @@
+﻿<!-- File: Ogur.Fishing.Host.Wpf/Views/UpdateRequiredView.xaml -->
+
+<UserControl x:Class="Ogur.Terraria.Manager.Devexpress.Views.UpdateRequiredView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Border Background="#1E1E1E">
+        <Grid>
+            <StackPanel MaxWidth="600" 
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
+                        Margin="40">
+                
+                <!-- Icon -->
+                <Viewbox Width="80" Height="80" Margin="0,0,0,30">
+                    <Path Fill="#FFA500" Data="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,7H13V13H11V7M11,15H13V17H11V15Z"/>
+                </Viewbox>
+
+                <!-- Title -->
+                <TextBlock Text="Update Required" 
+                           FontSize="32" 
+                           FontWeight="Bold"
+                           Foreground="White"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,20"/>
+                
+                <!-- Message -->
+                <TextBlock Text="A new version is available and must be installed to continue using the application."
+                           FontSize="16"
+                           Foreground="#CCCCCC"
+                           TextWrapping="Wrap"
+                           TextAlignment="Center"
+                           Margin="0,0,0,30"/>
+                
+                <!-- Version Info Box -->
+                <Border Background="#2D2D30" 
+                        Padding="20" 
+                        CornerRadius="8"
+                        Margin="0,0,0,10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="10"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="Current Version:" 
+                                   Grid.Row="0" Grid.Column="0"
+                                   FontSize="14"
+                                   Foreground="#999999"
+                                   Margin="0,0,10,0"/>
+                        <TextBlock Text="{Binding CurrentVersion}" 
+                                   Grid.Row="0" Grid.Column="1"
+                                   FontSize="14"
+                                   Foreground="White"
+                                   FontWeight="SemiBold"/>
+
+                        <TextBlock Text="Latest Version:" 
+                                   Grid.Row="2" Grid.Column="0"
+                                   FontSize="14"
+                                   Foreground="#999999"
+                                   Margin="0,0,10,0"/>
+                        <TextBlock Text="{Binding LatestVersion}" 
+                                   Grid.Row="2" Grid.Column="1"
+                                   FontSize="14"
+                                   Foreground="#4EC9B0"
+                                   FontWeight="Bold"/>
+                    </Grid>
+                </Border>
+
+                <!-- Release Notes -->
+                <Border Background="#2D2D30" 
+                        Padding="20" 
+                        CornerRadius="8"
+                        Margin="0,10,0,30">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasReleaseNotes}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+    
+                    <StackPanel>
+                        <TextBlock Text="What's New:" 
+                                   FontSize="14"
+                                   Foreground="#999999"
+                                   Margin="0,0,0,10"/>
+                        <TextBlock Text="{Binding ReleaseNotes}"
+                                   FontSize="13"
+                                   Foreground="White"
+                                   TextWrapping="Wrap"
+                                   LineHeight="20"/>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Download Button -->
+                <Button Command="{Binding DownloadCommand}"
+                        Background="#007ACC"
+                        Foreground="White"
+                        Padding="30,12"
+                        FontSize="15"
+                        FontWeight="SemiBold"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        HorizontalAlignment="Center">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}"
+                                                CornerRadius="4"
+                                                Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#005A9E"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="⬇ " FontSize="16" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                        <TextBlock Text="Download Update" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- Exit Button -->
+                <Button Command="{Binding ExitCommand}"
+                        Content="Exit Application"
+                        Background="Transparent"
+                        Foreground="#999999"
+                        Padding="20,10"
+                        FontSize="13"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        HorizontalAlignment="Center"
+                        Margin="0,15,0,0">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Foreground" Value="White"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

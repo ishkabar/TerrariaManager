@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net8.0-windows</TargetFramework>
+        <ApplicationIcon>Assets\ogur.ico</ApplicationIcon>
+        <UseWPF>true</UseWPF>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ApplicationDefinition Include="Devexpress\App.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </ApplicationDefinition>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Resource Include="Assets\ogur.ico" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Ogur.Abstractions" Version="0.2.20-alpha" />
+        <PackageReference Include="Ogur.Core" Version="0.2.64-alpha" />
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.2" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.2" />
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.2" />
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.2" />
+        <PackageReference Include="NLog" Version="5.2.8" />
+
+        <PackageReference Include="DevExpress.Images" Version="23.2.14" />
+        <PackageReference Include="DevExpress.Wpf.Core" Version="23.2.14" />
+        <PackageReference Include="DevExpress.Wpf.ThemesLW" Version="23.2.14" />
+        <PackageReference Include="DevExpress.Wpf.LayoutControl" Version="23.2.14" />
+        <PackageReference Include="DevExpress.Mvvm.CodeGenerators" Version="22.1.*-*" />
+        <PackageReference Include="DevExpress.Wpf.Themes.Office2019Colorful" Version="23.2.14" />
+        <PackageReference Include="DevExpress.Wpf.Themes.VS2019Dark" Version="23.2.14" />
+        <PackageReference Include="DevExpress.Data" Version="23.2.14" />
+
+        <PackageReference Include="SSH.NET" Version="2024.1.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="appsettings.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+</Project>
