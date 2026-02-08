@@ -2,6 +2,18 @@
 
 A desktop application for managing Terraria dedicated servers via SSH. Built with WPF, DevExpress, and .NET 8.0.
 
+## 🎮 Server Support
+
+This application supports multiple Terraria server types across different branches:
+
+- **`main` branch**: Vanilla Terraria (beardedio/terraria)
+- **`tModLoader` branch**: tModLoader with mods support ⭐
+- **`tshock` branch**: TShock server (planned)
+
+**Switch branches to use the version matching your server type.** Setup instructions for each are below.
+
+---
+
 ## Background
 
 This project was born out of a practical need. My friends were playing on my Terraria server, and every time they needed to execute server commands, they had to SSH into the Linux host. Since most of them weren't comfortable with command-line interfaces, I built this GUI application to give them a simple, user-friendly way to manage the server.
@@ -11,7 +23,8 @@ This project was born out of a practical need. My friends were playing on my Ter
 ### Authentication & Security
 - Integration with Ogur.Hub authentication system
 - Secure SSH connection management
-- Encrypted password storage
+- Encrypted password storage (separate credentials file)
+- **Remember Me** checkbox for auto-login
 - Auto-connect on startup option
 
 ### Server Management
@@ -19,16 +32,20 @@ This project was born out of a practical need. My friends were playing on my Ter
 - Direct command execution via SSH
 - Docker container attachment (supports multiple containers)
 - Connection status indicator (color-coded: red/yellow/green)
+- **tModLoader branch**: Screen session + named pipe for reliable command execution
 
 ### Command Interface
 - **Console View**: Traditional terminal-style interface with command history
 - **Commands View**: Visual button-based interface organized by categories:
     - Time Commands (dawn, noon, dusk, midnight)
-    - Server Management (save, version, seed, etc.)
+    - Server Management (save, version, seed, modlist*, etc.)
+    - **Mods Category*** (BossProgress, HEROsAdmin, msaudit, msauditclear)
     - Admin Commands (kick, ban, server shutdown)
 - Quick-access buttons for common operations
 - Input dialogs for commands requiring parameters
 - Confirmation prompts for destructive actions
+
+*\* tModLoader branch only*
 
 ### User Experience
 - Dark theme UI optimized for extended use
@@ -44,7 +61,8 @@ This project was born out of a practical need. My friends were playing on my Ter
 
 ### Technical Features
 - Multi-container support (easily switch between test/production servers)
-- Tmux session management for persistent connections
+- **main branch**: Tmux session management for persistent connections
+- **tModLoader branch**: Screen session + named pipe for command execution
 - UTF-8 encoding without BOM for proper SSH compatibility
 - ANSI escape code filtering for clean console output
 - Automatic console output limiting (10,000 characters)
@@ -58,7 +76,8 @@ Ogur.Terraria.Manager/
 │       └── ServerCommand.cs       # Command definitions with input/confirmation flags
 ├── Infrastructure/                # Services and configuration
 │   ├── Config/
-│   │   └── AppSettings.cs        # Application settings with encryption
+│   │   ├── AppSettings.cs        # Application settings with encryption
+│   │   └── LoginCredentials.cs   # Separate login storage (tModLoader)
 │   ├── Services/
 │   │   ├── SshService.cs         # SSH/Docker management
 │   │   ├── NavigationService.cs  # View navigation
@@ -98,10 +117,13 @@ Ogur.Terraria.Manager/
 - .NET 8.0 Runtime
 - Windows 10/11
 - SSH access to a Linux server running Terraria in Docker
-- Tmux installed on the server
+- **main branch**: Tmux installed on server
+- **tModLoader branch**: Screen installed (auto-installed by start script)
 - Server must have Docker container with `stdin_open: true`
 
-## Server Setup
+---
+
+## Server Setup - Vanilla Terraria (`main` branch)
 
 ### 1. Docker Compose Configuration
 ```yaml
@@ -120,8 +142,6 @@ services:
 ```
 
 ### 2. Tmux Session Setup
-
-The application requires a tmux session to be created by the SSH user:
 ```bash
 # Switch to your SSH user (e.g., 'terraria')
 su - terraria
@@ -131,8 +151,7 @@ tmux new-session -d -s terraria "docker attach terraria"
 
 # Verify session exists
 tmux ls
-
-# The session should show: terraria: 1 windows (created ...)
+# Should show: terraria: 1 windows (created ...)
 ```
 
 **Important Notes:**
@@ -142,11 +161,6 @@ tmux ls
 - To manually detach from tmux: `Ctrl+B`, then `D`
 
 ### 3. User Permissions
-
-Ensure your SSH user has:
-- Docker access (add to `docker` group)
-- Tmux installed
-- Read/write access to the Terraria directories
 ```bash
 # Add user to docker group
 sudo usermod -aG docker terraria
@@ -155,13 +169,109 @@ sudo usermod -aG docker terraria
 sudo apt install tmux
 ```
 
+---
+
+## Server Setup - tModLoader (`tModLoader` branch)
+
+### 1. Docker Compose Configuration
+```yaml
+services:
+  terraria:
+    image: jacobsmile/tmodloader1.4:latest
+    container_name: terraria-serwer
+    restart: unless-stopped
+    ports:
+      - "7777:7777"
+    environment:
+      - TMOD_PASS=your_password
+      - TMOD_MOTD=Your MOTD here
+      - TMOD_MAXPLAYERS=8
+      - TMOD_WORLDNAME=YourWorld
+      - TMOD_WORLDSIZE=3
+      - TMOD_DIFFICULTY=2
+      - TMOD_AUTOCREATE=3
+      - TMOD_WORLDSEED=
+    volumes:
+      - ./Worlds:/data/tModLoader/Worlds
+      - ./Mods:/data/tModLoader/Mods
+      - ./start-server.sh:/start-server.sh
+    entrypoint: ["/start-server.sh"]
+    stdin_open: true
+    tty: true
+```
+
+### 2. Create start-server.sh
+```bash
+#!/bin/bash
+apt-get update -qq && apt-get install -y -qq screen
+
+mkfifo /tmp/terraria_input
+
+screen -dmS terraria bash -c "tail -f /tmp/terraria_input | /terraria-server/LaunchUtils/ScriptCaller.sh -server -tmlsavedirectory '/data/tModLoader' -steamworkshopfolder '/data/steamMods/steamapps/workshop' -config '/terraria-server/serverconfig.txt'"
+
+sleep 5
+screen -ls
+
+exec tail -f /dev/null
+```
+
+Make it executable:
+```bash
+chmod +x start-server.sh
+```
+
+### 3. Folder Structure
+```
+your-terraria-folder/
+├── docker-compose.yml
+├── start-server.sh
+├── Worlds/
+│   └── YourWorld.wld
+└── Mods/
+    ├── enabled.json
+    ├── CalamityMod.tmod
+    ├── InfernumMode.tmod
+    └── ... (other mods)
+```
+
+### 4. enabled.json Example
+```json
+{
+  "EnabledMods": [
+    "CalamityMod",
+    "InfernumMode",
+    "MagicStorage",
+    "HEROsMod"
+  ]
+}
+```
+
+### 5. tModLoader-Specific Features
+
+**Commands:**
+- `modlist` - Show loaded mods
+- `BossProgress` - View boss progression
+- `HEROsAdmin` - Get admin info (returns admin password)
+- `msaudit` - View Magic Storage audit log
+- `msauditclear` - Clear Magic Storage audit log
+
+**HEROsMod Admin Setup:**
+1. Run `HEROsAdmin` command to get admin password
+2. Join the game
+3. Create account: `/register username password`
+4. Login: `/login username password`
+5. Become admin: `/auth <password_from_HEROsAdmin>`
+
+---
+
 ## Installation
 
 1. Download the latest release from GitHub
-2. Extract to your preferred location
-3. Run `Ogur.Terraria.Manager.exe`
-4. Login with your Ogur.Hub credentials
-5. Configure SSH settings in the Settings tab
+2. **Switch to the branch matching your server type**
+3. Extract to your preferred location
+4. Run `Ogur.Terraria.Manager.exe`
+5. Login with your Ogur.Hub credentials (check **Remember Me** for auto-login)
+6. Configure SSH settings in the Settings tab
 
 ## Configuration
 
@@ -170,13 +280,14 @@ sudo apt install tmux
 **SSH Connection:**
 - Host: Server IP or hostname
 - Port: SSH port (default 22)
-- Username: SSH username (must match tmux session creator)
+- Username: SSH username
 - Password: SSH password (encrypted)
-- Container Name: Docker container name (e.g., "terraria")
+- Container Name: Docker container name (e.g., "terraria" or "terraria-serwer")
 - Auto-connect: Automatically connect on startup
 
 **Ogur.Hub Authentication:**
 - API URL: Authentication server URL
+- Remember Me: Save login credentials securely
 
 **User Interface:**
 - Console Font Size: 8-24pt
@@ -193,9 +304,9 @@ new ServerCommand
     Command = "kick", 
     Icon = "🚫", 
     Category = "Admin",
-    RequiresInput = true,           // Shows input dialog
+    RequiresInput = true,
     InputPrompt = "Enter player name:",
-    RequiresConfirm = true,         // Shows confirmation dialog
+    RequiresConfirm = true,
     ConfirmMessage = "Kick this player?"
 }
 ```
@@ -229,54 +340,51 @@ new ServerCommand
 
 ### Multiple Servers
 
-To manage multiple Terraria servers:
-
-1. Create separate Docker containers with different names
-2. Create tmux sessions for each: `tmux new-session -d -s <name> "docker attach <name>"`
-3. Switch between them using the **Container Name** setting
-4. Each container maintains its own console history
+To manage multiple Terraria servers, switch between them using the **Container Name** setting in Settings tab.
 
 ## Troubleshooting
 
-### "No sessions" error
+### Vanilla Branch - "No sessions" error
 
 **Cause:** Tmux session was created by a different user than the SSH user.
 
 **Solution:**
 ```bash
-# Delete wrong session
 tmux kill-session -t terraria
-
-# SSH as the correct user
 ssh terraria@your-server
-
-# Create session as this user
 tmux new-session -d -s terraria "docker attach terraria"
 ```
 
-### Commands not executing
+### tModLoader Branch - Commands not executing
 
-**Cause:** Docker container not started with `stdin_open: true`.
+**Cause:** Named pipe not working or screen session crashed.
 
 **Solution:**
+```bash
+docker exec terraria-serwer screen -ls
+docker exec terraria-serwer ls -la /tmp/terraria_input
+docker-compose restart
+```
+
+### tModLoader Branch - Mods not loading
+
+**Cause:** `enabled.json` missing or incorrect format.
+
+**Solution:**
+1. Check `/Mods/enabled.json` exists
+2. Verify mod files are in `/Mods/` directory
+3. Ensure `EnabledMods` array contains correct mod names
+
+### Common Issues
+
+**Connection timeout:**
+1. Verify SSH access: `ssh user@host`
+2. Check firewall: `sudo ufw status`
+3. Verify container: `docker ps`
+
+**Container not started with `stdin_open: true`:**
 1. Add `stdin_open: true` to docker-compose.yml
-2. Recreate container: `docker-compose up -d --force-recreate`
-3. Recreate tmux session
-
-### Connection timeout
-
-**Cause:** Firewall blocking SSH or incorrect credentials.
-
-**Solution:**
-1. Verify SSH access manually: `ssh user@host`
-2. Check firewall rules: `sudo ufw status`
-3. Verify container is running: `docker ps`
-
-### Input dialog hidden behind window
-
-**Cause:** Application set to "Always on Top" but dialogs don't inherit this.
-
-**Solution:** This is fixed in the latest version. Update to the newest release.
+2. Recreate: `docker-compose up -d --force-recreate`
 
 ## Technologies
 
@@ -295,6 +403,11 @@ tmux new-session -d -s terraria "docker attach terraria"
 git clone https://github.com/yourusername/Ogur.Terraria.Manager.git
 cd Ogur.Terraria.Manager
 
+# Switch to desired branch
+git checkout main          # For vanilla Terraria
+# OR
+git checkout tModLoader    # For tModLoader
+
 # Restore dependencies
 dotnet restore
 
@@ -304,13 +417,6 @@ dotnet build
 # Run
 dotnet run --project Ogur.Terraria.Manager
 ```
-
-### Project Structure
-
-- **Core**: Domain models and business logic
-- **Infrastructure**: Services, configuration, and external integrations
-- **Devexpress**: UI layer with ViewModels and Views
-- Clean architecture with dependency injection throughout
 
 ## License
 
@@ -326,6 +432,7 @@ For issues and questions, please open an issue on GitHub.
 
 ## Acknowledgments
 
-- Terraria Server Docker Image: [beardedio/terraria](https://hub.docker.com/r/beardedio/terraria)
+- Vanilla Terraria Docker: [beardedio/terraria](https://hub.docker.com/r/beardedio/terraria)
+- tModLoader Docker: [jacobsmile/tmodloader1.4](https://hub.docker.com/r/jacobsmile/tmodloader1.4)
 - SSH.NET Library: [sshnet/SSH.NET](https://github.com/sshnet/SSH.NET)
 - DevExpress WPF Components
