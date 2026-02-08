@@ -74,7 +74,7 @@ public class SshService : IDisposable
             _containerName = containerName;
             _shellStream = _sshClient!.CreateShellStream("xterm-256color", 120, 40, 800, 600, 4096);
 
-            await Task.Delay(1000); // poczekaj na shell prompt
+            await Task.Delay(1000);
 
             // Flush MOTD
             if (_shellStream.DataAvailable)
@@ -82,8 +82,9 @@ public class SshService : IDisposable
                 _shellStream.Read();
             }
 
-            // docker exec z interaktywnym shellem podłączonym do terraria procesu
-            var cmd = $"docker attach {containerName}\n";
+            // ZMIANA: Użyj tail -f do czytania outputu ze screen
+            var cmd = $"docker exec {containerName} bash -c 'tail -f /tmp/screen_output.txt & screen -S terraria -X hardcopy /tmp/screen_output.txt; while true; do sleep 1; screen -S terraria -X hardcopy /tmp/screen_output.txt; done'\n";
+
             var attachBytes = new UTF8Encoding(false).GetBytes(cmd);
             await _shellStream.WriteAsync(attachBytes, 0, attachBytes.Length);
             await _shellStream.FlushAsync();
@@ -109,13 +110,10 @@ public class SshService : IDisposable
         {
             Console.WriteLine($"📤 SENDING: '{command}'");
 
-            var escaped = command.Replace("\"", "\\\"");
-            var cmd = $"echo \"{escaped}\" | docker exec -i {_containerName} /bin/sh -c 'cat > /proc/1/fd/0'";
-
-            Console.WriteLine($"📤 CMD: {cmd}");
+            var cmd = $"docker exec -i {_containerName} bash -c \"echo '{command}' >> /tmp/terraria_input\"";
 
             var result = await Task.Run(() => _sshClient.RunCommand(cmd));
-            Console.WriteLine($"✅ SENT: exit={result.ExitStatus}, err='{result.Error}'");
+            Console.WriteLine($"✅ SENT: exit={result.ExitStatus}");
         }
         catch (Exception ex)
         {

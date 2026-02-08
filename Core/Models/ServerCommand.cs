@@ -23,6 +23,12 @@ public class ServerCommand
             new ServerCommand { Name = "Dusk", Command = "dusk", Icon = "🌆", Category = "Time" },
             new ServerCommand { Name = "Midnight", Command = "midnight", Icon = "🌙", Category = "Time" },
 
+            // Mod-specific commands
+            new ServerCommand { Name = "Boss Progress", Command = "BossProgress", Icon = "👹", Category = "Server" },
+            new ServerCommand { Name = "HERO's Admin Info", Command = "HEROsAdmin", Icon = "🦸", Category = "Server" },
+            new ServerCommand { Name = "MS Audit", Command = "msaudit", Icon = "📊", Category = "Server" },
+            new ServerCommand { Name = "MS Audit Clear", Command = "msauditclear", Icon = "🧹", Category = "Server", RequiresConfirm = true, ConfirmMessage = "Clear Magic Storage audit log?" },
+
             // Server management
             new ServerCommand { Name = "Save", Command = "save", Icon = "💾", Category = "Server" },
             new ServerCommand { Name = "Playing", Command = "playing", Icon = "👥", Category = "Server" },
@@ -36,13 +42,17 @@ public class ServerCommand
             new ServerCommand { Name = "Clear", Command = "clear", Icon = "🗑️", Category = "Server" },
             new ServerCommand { Name = "Port", Command = "port", Icon = "🔌", Category = "Server" },
             new ServerCommand { Name = "Max Players", Command = "maxplayers", Icon = "👤", Category = "Server" },
-            new ServerCommand { Name = "Password", Command = "password", Icon = "🔒", Category = "Server", RequiresInput = true, InputPrompt = "Enter new password:", RequiresConfirm = true, ConfirmMessage = "Change server password?" },
+            new ServerCommand { Name = "Show Password", Command = "password", Icon = "🔒", Category = "Server" },
+            new ServerCommand { Name = "Change Password", Command = "password", Icon = "🔑", Category = "Server", RequiresInput = true, InputPrompt = "Enter new password:", RequiresConfirm = true, ConfirmMessage = "Change server password?" },
+            new ServerCommand { Name = "Mod List", Command = "modlist", Icon = "📦", Category = "Server" },
+            new ServerCommand { Name = "Custom Sets", Command = "customsets", Icon = "🎮", Category = "Server" },
 
             // Admin commands
             new ServerCommand { Name = "Kick", Command = "kick", Icon = "🚫", Category = "Admin", RequiresInput = true, InputPrompt = "Enter player name:", RequiresConfirm = true, ConfirmMessage = "Kick this player?" },
             new ServerCommand { Name = "Ban", Command = "ban", Icon = "🔨", Category = "Admin", RequiresInput = true, InputPrompt = "Enter player name:", RequiresConfirm = true, ConfirmMessage = "Ban this player?" },
-            new ServerCommand { Name = "Exit", Command = "exit", Icon = "💾➡️", Category = "Admin", RequiresConfirm = true, ConfirmMessage = "Shutdown server and save?" },
-            new ServerCommand { Name = "Exit No Save", Command = "exit-nosave", Icon = "⚠️➡️", Category = "Admin", RequiresConfirm = true, ConfirmMessage = "Shutdown server WITHOUT saving?" },
+            new ServerCommand { Name = "Say", Command = "say", Icon = "💬", Category = "Admin", RequiresInput = true, InputPrompt = "Enter message:", RequiresConfirm = false },
+            new ServerCommand { Name = "Exit & Save", Command = "exit", Icon = "💾➡️", Category = "Admin", RequiresConfirm = true, ConfirmMessage = "Shutdown server and save?" },
+            new ServerCommand { Name = "Exit No Save", Command = "exit-nosave", Icon = "⚠️➡️", Category = "Admin", RequiresConfirm = true, ConfirmMessage = "⚠️ Shutdown server WITHOUT saving?" },
         };
     }
 }

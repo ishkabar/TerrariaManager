@@ -102,13 +102,62 @@
                            Visibility="{Binding ErrorMessage, Converter={StaticResource NullToCollapsedConverter}}"/>
             </dxlc:LayoutItem>
 
+
+
             <!-- Login Button -->
             <dxlc:LayoutItem>
                 <dx:SimpleButton Content="Login"
-                                Command="{Binding LoginCommand}"
-                                Style="{StaticResource PrimaryButton}"
-                                Height="40"
-                                FontSize="16"/>
+                                 Command="{Binding LoginCommand}"
+                                 Style="{StaticResource PrimaryButton}"
+                                 Height="40"
+                                 FontSize="16"/>
+            </dxlc:LayoutItem>
+
+            <!-- Remember Me Checkbox -->
+            <dxlc:LayoutItem Margin="0,15,0,0">
+                <CheckBox Content="Remember me"
+                          IsChecked="{Binding RememberMe, Mode=TwoWay}"
+                          Foreground="White"
+                          FontSize="13"
+                          VerticalAlignment="Center"
+                          IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBoolConverter}}">
+                    <CheckBox.Style>
+                        <Style TargetType="CheckBox">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="CheckBox">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border x:Name="CheckBoxBorder"
+                                                    Width="18"
+                                                    Height="18"
+                                                    Background="#2d2d30"
+                                                    BorderBrush="#3e3e42"
+                                                    BorderThickness="1"
+                                                    CornerRadius="3"
+                                                    Margin="0,0,8,0">
+                                                <TextBlock x:Name="CheckMark"
+                                                          Text="✓"
+                                                          Foreground="#007acc"
+                                                          FontSize="14"
+                                                          FontWeight="Bold"
+                                                          HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center"
+                                                          Visibility="Collapsed"/>
+                                            </Border>
+                                            <ContentPresenter VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                                                <Setter TargetName="CheckBoxBorder" Property="Background" Value="#3e3e42"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </CheckBox.Style>
+                </CheckBox>
             </dxlc:LayoutItem>
 
         </dxlc:LayoutControl>

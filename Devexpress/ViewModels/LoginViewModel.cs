@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Ogur.Abstractions.Hub;
 using Ogur.Terraria.Manager.Infrastructure.Services;
+using Ogur.Terraria.Manager.Infrastructure.Config;
 
 namespace Ogur.Terraria.Manager.Devexpress.ViewModels;
 
@@ -17,11 +18,13 @@ public partial class LoginViewModel : ObservableObject
     private readonly IAuthService _authService;
     private readonly ILicenseValidator _licenseValidator;
     private readonly IMessenger _messenger;
+    private readonly LoginCredentials _credentials;
     private bool _isClearing;
 
     [ObservableProperty] private string? _username;
     [ObservableProperty] private string? _password;
     [ObservableProperty] private bool _isLoading;
+    [ObservableProperty] private bool _rememberMe;
 
     private string? _errorMessage;
     public string? ErrorMessage
@@ -54,6 +57,15 @@ public partial class LoginViewModel : ObservableObject
         _authService = authService;
         _licenseValidator = licenseValidator;
         _messenger = messenger;
+
+        // Load saved credentials
+        _credentials = LoginCredentials.Load();
+        if (_credentials.RememberMe)
+        {
+            Username = _credentials.Username;
+            Password = _credentials.GetPassword();
+            RememberMe = true;
+        }
     }
 
     partial void OnUsernameChanged(string? value)
@@ -105,6 +117,19 @@ public partial class LoginViewModel : ObservableObject
 
                 _logger.LogInformation("License valid until: {ExpiresAt}", licenseResult.ExpiresAt);
 
+                // Save credentials if RememberMe is checked
+                if (RememberMe)
+                {
+                    _credentials.Username = Username;
+                    _credentials.SetPassword(Password);
+                    _credentials.RememberMe = true;
+                    _credentials.Save();
+                }
+                else
+                {
+                    _credentials.Clear();
+                }
+
                 _messenger.Send(new LoginSucceededMessage(result.Username));
             }
             else
@@ -142,7 +167,8 @@ public partial class LoginViewModel : ObservableObject
         {
             IsLoading = false;
             _isClearing = true;
-            Password = string.Empty;
+            if (!RememberMe)
+                Password = string.Empty;
             _isClearing = false;
         }
     }
