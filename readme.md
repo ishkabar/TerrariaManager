@@ -1,105 +1,125 @@
-﻿# Ogur Terraria Manager
+# Ogur.Terraria.Manager
 
-A desktop application for managing Terraria dedicated servers via SSH. Built with WPF, DevExpress, and .NET 8.0.
+[![wakatime](https://wakatime.com/badge/user/c59759de-7539-43ec-bc20-5cd3aeca16e5/project/ffde0ffd-88fa-49ac-90c7-48539f4743ce.svg?style=flat-square)](https://wakatime.com/badge/user/c59759de-7539-43ec-bc20-5cd3aeca16e5/project/ffde0ffd-88fa-49ac-90c7-48539f4743ce)
+![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square&logo=dotnet)
+![WPF](https://img.shields.io/badge/WPF-DevExpress-512BD4?style=flat-square)
+![Platform](https://img.shields.io/badge/Platform-Windows-0078D6?style=flat-square&logo=windows)
+![SSH](https://img.shields.io/badge/SSH-Renci.SshNet-000000?style=flat-square)
+
+Desktop application for managing Terraria dedicated servers via SSH. Built for friends who needed a GUI alternative to command-line server management.
 
 ## Background
 
-This project was born out of a practical need. My friends were playing on my Terraria server, and every time they needed to execute server commands, they had to SSH into the Linux host. Since most of them weren't comfortable with command-line interfaces, I built this GUI application to give them a simple, user-friendly way to manage the server.
+Built out of practical need - my friends were playing on my Terraria server, but they weren't comfortable with SSH and command-line interfaces. This GUI gives them a simple, user-friendly way to manage the server without touching a terminal.
 
 ## Features
 
 ### Authentication & Security
-- Integration with Ogur.Hub authentication system
-- Secure SSH connection management
-- Encrypted password storage
-- Auto-connect on startup option
+- **Ogur.Hub Integration**: Centralized authentication system
+- **License Validation**: Device fingerprinting (HWID + GUID)
+- **Secure SSH**: Encrypted password storage with auto-connect
+- **Update Enforcement**: Required version checking
 
 ### Server Management
-- Real-time console output with ANSI color support
-- Direct command execution via SSH
-- Docker container attachment (supports multiple containers)
-- Connection status indicator (color-coded: red/yellow/green)
+- **Real-time Console**: ANSI color support with automatic scrolling
+- **SSH Connection**: Direct command execution via Renci.SshNet
+- **Docker Integration**: Tmux session attachment to containers
+- **Status Indicator**: Color-coded connection state (red/yellow/green)
+- **Multi-Container**: Switch between test/production servers
 
 ### Command Interface
-- **Console View**: Traditional terminal-style interface with command history
-- **Commands View**: Visual button-based interface organized by categories:
-    - Time Commands (dawn, noon, dusk, midnight)
-    - Server Management (save, version, seed, etc.)
-    - Admin Commands (kick, ban, server shutdown)
+
+**Console View:**
+- Traditional terminal-style interface with command history
+- Direct command input with Enter to execute
+- `Ctrl+Enter` for chat messages (say command)
+- Clear button to reset console output
+- UTF-8 encoding without BOM for proper SSH compatibility
+
+**Commands View:**
+- Visual button-based interface organized by categories:
+  - **Time**: dawn, noon, dusk, midnight
+  - **Server**: save, version, seed, port, maxplayers
+  - **Admin**: kick, ban, password, motd, shutdown
 - Quick-access buttons for common operations
 - Input dialogs for commands requiring parameters
 - Confirmation prompts for destructive actions
 
 ### User Experience
-- Dark theme UI optimized for extended use
-- Tab-based navigation (Console, Commands, Settings)
-- Keyboard shortcuts:
-    - `Enter` - Send command
-    - `Ctrl+Enter` - Send chat message (say command)
-    - `Enter` - Execute in input dialogs
-    - `Escape` - Cancel input dialogs
-- Always-on-top window option
-- Window dragging from anywhere
-- Custom borderless window design
-
-### Technical Features
-- Multi-container support (easily switch between test/production servers)
-- Tmux session management for persistent connections
-- UTF-8 encoding without BOM for proper SSH compatibility
-- ANSI escape code filtering for clean console output
-- Automatic console output limiting (10,000 characters)
-- Settings persistence in AppData
+- **Dark Theme**: Optimized for extended use
+- **Tab Navigation**: Console, Commands, Settings
+- **Keyboard Shortcuts**:
+  - `Enter` - Send command
+  - `Ctrl+Enter` - Send chat message
+  - `Escape` - Cancel input dialogs
+- **Always-on-Top**: Pin window above other applications
+- **Drag Anywhere**: Move window from any point
+- **Borderless Design**: Custom WPF window chrome
 
 ## Architecture
 ```
 Ogur.Terraria.Manager/
-├── Core/                          # Domain models
+├── Core/                           # Domain models
 │   └── Models/
-│       └── ServerCommand.cs       # Command definitions with input/confirmation flags
-├── Infrastructure/                # Services and configuration
+│       ├── ServerCommand.cs        # Command definitions with flags
+│       └── ServerStatus.cs         # Connection state enum
+├── Infrastructure/                 # Services
 │   ├── Config/
-│   │   └── AppSettings.cs        # Application settings with encryption
+│   │   └── AppSettings.cs         # Encrypted settings persistence
 │   ├── Services/
-│   │   ├── SshService.cs         # SSH/Docker management
-│   │   ├── NavigationService.cs  # View navigation
-│   │   └── AppFlowCoordinator.cs # Startup flow orchestration
+│   │   ├── SshService.cs          # SSH/Tmux/Docker management
+│   │   ├── ApiClient.cs           # Ogur.Hub communication
+│   │   ├── NavigationService.cs   # View navigation
+│   │   └── AppFlowCoordinator.cs  # Startup orchestration
 │   └── Messages/
-│       └── NavigationMessage.cs   # MVVM messaging
-├── Devexpress/                    # UI Layer
+│       └── NavigationMessage.cs    # MVVM messaging
+├── Devexpress/                     # UI Layer
 │   ├── ViewModels/
-│   │   ├── ShellViewModel.cs     # Main window
-│   │   ├── ConsoleViewModel.cs   # Console logic
-│   │   ├── SettingsViewModel.cs  # Settings management
-│   │   └── LoginViewModel.cs     # Authentication
+│   │   ├── ShellViewModel.cs      # Main window logic
+│   │   ├── ConsoleViewModel.cs    # Console + commands
+│   │   ├── SettingsViewModel.cs   # Configuration
+│   │   ├── LoginViewModel.cs      # Authentication
+│   │   └── UpdateRequiredViewModel.cs  # Update enforcement
 │   ├── Views/
-│   │   ├── ShellWindow.xaml      # Main window
-│   │   ├── MainView.xaml         # Tab container with status bar
-│   │   ├── ConsoleView.xaml      # Terminal-style interface
-│   │   ├── CommandsView.xaml     # Button-based interface
-│   │   ├── SettingsView.xaml     # Configuration
-│   │   ├── LoginView.xaml        # Authentication UI
-│   │   └── InputDialog.xaml      # Custom input prompt
+│   │   ├── ShellWindow.xaml       # Main window
+│   │   ├── MainView.xaml          # Tab container + status bar
+│   │   ├── ConsoleView.xaml       # Terminal interface
+│   │   ├── CommandsView.xaml      # Button interface
+│   │   ├── SettingsView.xaml      # Settings form
+│   │   ├── LoginView.xaml         # Auth UI
+│   │   ├── InputDialog.xaml       # Custom input prompt
+│   │   ├── UpdateRequiredView.xaml     # Update blocker
+│   │   └── LicenseExpiredWindow.xaml   # License blocker
 │   └── Converters/
-│       ├── StatusToColorConverter.cs      # Connection status colors
-│       └── InverseBooleanConverter.cs     # Boolean negation for bindings
+│       ├── StatusToColorConverter.cs       # Connection colors
+│       ├── InverseBoolConverter.cs         # Boolean negation
+│       └── NullToCollapsedConverter.cs     # Visibility binding
 └── Assets/
-    └── ogur.ico                   # Application icon
+    └── ogur.ico                    # Application icon
 ```
 
 ### Design Patterns
-- **MVVM**: Clean separation of concerns with ViewModels
+- **MVVM**: Clean separation with CommunityToolkit.Mvvm
 - **Dependency Injection**: Microsoft.Extensions.DependencyInjection
-- **MVVM Messaging**: CommunityToolkit.Mvvm for loosely-coupled communication
-- **Repository Pattern**: Settings persistence with encryption
+- **Repository Pattern**: AppSettings with encryption
 - **Strategy Pattern**: Command execution with input/confirmation strategies
+- **Messaging**: Loosely-coupled view navigation
+
+## Tech Stack
+
+- **.NET 8.0-windows** - WPF framework
+- **DevExpress 24.1** - Professional UI components
+- **SSH.NET** (Renci.SshNet 2024.2.0) - SSH client library
+- **CommunityToolkit.Mvvm** (8.3.2) - MVVM helpers
+- **Ogur.Hub Integration** - Authentication and licensing
 
 ## Prerequisites
 
 - .NET 8.0 Runtime
 - Windows 10/11
-- SSH access to a Linux server running Terraria in Docker
-- Tmux installed on the server
-- Server must have Docker container with `stdin_open: true`
+- SSH access to Linux server running Terraria in Docker
+- Tmux installed on server
+- Docker container with `stdin_open: true`
 
 ## Server Setup
 
@@ -120,10 +140,8 @@ services:
 ```
 
 ### 2. Tmux Session Setup
-
-The application requires a tmux session to be created by the SSH user:
 ```bash
-# Switch to your SSH user (e.g., 'terraria')
+# Switch to SSH user (must match application SSH credentials)
 su - terraria
 
 # Create tmux session attached to Docker container
@@ -131,37 +149,34 @@ tmux new-session -d -s terraria "docker attach terraria"
 
 # Verify session exists
 tmux ls
-
-# The session should show: terraria: 1 windows (created ...)
+# Output: terraria: 1 windows (created ...)
 ```
 
-**Important Notes:**
-- The tmux session MUST be created by the same user the application SSHs as
+**Important:**
+- Tmux session MUST be created by the same user the app SSHs as
 - Each Docker container requires its own tmux session
 - Sessions persist across application restarts
-- To manually detach from tmux: `Ctrl+B`, then `D`
+- Detach manually: `Ctrl+B`, then `D`
 
 ### 3. User Permissions
-
-Ensure your SSH user has:
-- Docker access (add to `docker` group)
-- Tmux installed
-- Read/write access to the Terraria directories
 ```bash
 # Add user to docker group
 sudo usermod -aG docker terraria
 
 # Install tmux if not present
 sudo apt install tmux
+
+# Verify Docker access
+docker ps
 ```
 
 ## Installation
 
-1. Download the latest release from GitHub
-2. Extract to your preferred location
+1. Download latest release from GitHub
+2. Extract to preferred location
 3. Run `Ogur.Terraria.Manager.exe`
-4. Login with your Ogur.Hub credentials
-5. Configure SSH settings in the Settings tab
+4. Login with Ogur.Hub credentials
+5. Configure SSH settings in Settings tab
 
 ## Configuration
 
@@ -171,12 +186,12 @@ sudo apt install tmux
 - Host: Server IP or hostname
 - Port: SSH port (default 22)
 - Username: SSH username (must match tmux session creator)
-- Password: SSH password (encrypted)
+- Password: SSH password (encrypted with DPAPI)
 - Container Name: Docker container name (e.g., "terraria")
 - Auto-connect: Automatically connect on startup
 
 **Ogur.Hub Authentication:**
-- API URL: Authentication server URL
+- API URL: Authentication server URL (https://api.hub.ogur.dev)
 
 **User Interface:**
 - Console Font Size: 8-24pt
@@ -185,7 +200,7 @@ sudo apt install tmux
 
 ### Command Configuration
 
-Commands are defined in `Core/Models/ServerCommand.cs`:
+Commands defined in `Core/Models/ServerCommand.cs`:
 ```csharp
 new ServerCommand 
 { 
@@ -204,50 +219,56 @@ new ServerCommand
 
 ### Connecting to Server
 
-1. Navigate to the **Settings** tab
-2. Enter your SSH credentials and container name
-3. Click **Connect** or enable **Auto-connect** for future launches
-4. Status indicator shows connection state:
-    - Red: Disconnected
-    - Yellow: Connecting...
-    - Green: Connected
+1. Navigate to **Settings** tab
+2. Enter SSH credentials and container name
+3. Click **Connect** or enable **Auto-connect**
+4. Status indicator shows state:
+   - 🔴 Red: Disconnected
+   - 🟡 Yellow: Connecting...
+   - 🟢 Green: Connected
 
 ### Using the Console
 
 **Console Tab:**
-- Type commands directly in the input box
+- Type commands directly in input box
 - Press `Enter` to execute
-- Press `Ctrl+Enter` to send a chat message (say command)
-- Click **Clear** to clear console output
+- Press `Ctrl+Enter` to send chat message (say command)
+- Click **Clear** to reset console output
 - Command history scrolls automatically
+- ANSI color codes filtered for clean output
+- Auto-limits to 10,000 characters
 
 **Commands Tab:**
 - Click category buttons to execute common commands
-- Commands requiring input will show a dialog
-- Destructive commands (kick, ban, shutdown) require confirmation
-- All buttons are disabled when not connected
+- Input dialogs appear for commands requiring parameters
+- Confirmation prompts for destructive actions (kick, ban, shutdown)
+- All buttons disabled when disconnected
 
 ### Multiple Servers
 
 To manage multiple Terraria servers:
 
 1. Create separate Docker containers with different names
-2. Create tmux sessions for each: `tmux new-session -d -s <name> "docker attach <name>"`
-3. Switch between them using the **Container Name** setting
-4. Each container maintains its own console history
+2. Create tmux sessions for each:
+```bash
+   tmux new-session -d -s terraria-test "docker attach terraria-test"
+   tmux new-session -d -s terraria-prod "docker attach terraria-prod"
+```
+3. Switch between them using **Container Name** setting
+4. Each container maintains independent console history
 
 ## Troubleshooting
 
 ### "No sessions" error
 
-**Cause:** Tmux session was created by a different user than the SSH user.
+**Cause:** Tmux session created by different user than SSH user.
 
 **Solution:**
 ```bash
 # Delete wrong session
 tmux kill-session -t terraria
 
-# SSH as the correct user
+# SSH as correct user
 ssh terraria@your-server
 
 # Create session as this user
@@ -259,7 +280,7 @@ tmux new-session -d -s terraria "docker attach terraria"
 **Cause:** Docker container not started with `stdin_open: true`.
 
 **Solution:**
-1. Add `stdin_open: true` to docker-compose.yml
+1. Add `stdin_open: true` to `docker-compose.yml`
 2. Recreate container: `docker-compose up -d --force-recreate`
 3. Recreate tmux session
 
@@ -271,61 +292,92 @@ tmux new-session -d -s terraria "docker attach terraria"
 1. Verify SSH access manually: `ssh user@host`
 2. Check firewall rules: `sudo ufw status`
 3. Verify container is running: `docker ps`
+4. Test tmux session: `tmux ls`
 
-### Input dialog hidden behind window
+### License validation failed
 
-**Cause:** Application set to "Always on Top" but dialogs don't inherit this.
+**Cause:** Invalid license, device limit exceeded, or Hub connection issues.
 
-**Solution:** This is fixed in the latest version. Update to the newest release.
+**Solution:**
+1. Verify Ogur.Hub is accessible
+2. Check license status in Hub admin panel
+3. Ensure device count is within limit (1 license = 2 devices max)
+4. Contact administrator if license expired
 
-## Technologies
+### Input dialog hidden
 
-- **Framework:** .NET 8.0
-- **UI:** WPF with DevExpress 24.1
-- **MVVM:** CommunityToolkit.Mvvm 8.3.2
-- **SSH:** SSH.NET (Renci.SshNet) 2024.2.0
-- **DI:** Microsoft.Extensions.DependencyInjection 9.0.0
-- **Authentication:** Ogur.Core & Ogur.Hub integration
+**Cause:** Application set to "Always on Top" but dialogs don't inherit.
+
+**Solution:** Fixed in latest version - dialogs now properly inherit Topmost property.
+
+## Command Reference
+
+### Time Commands
+- `dawn` - Set time to 4:30 AM
+- `noon` - Set time to 12:00 PM
+- `dusk` - Set time to 7:30 PM
+- `midnight` - Set time to 12:00 AM
+
+### Server Commands
+- `save` - Force world save
+- `version` - Display server version
+- `seed` - Show world seed
+- `port` - Show server port
+- `maxplayers` - Show max player count
+
+### Admin Commands
+- `kick <player>` - Kick player from server
+- `ban <player>` - Ban player by name
+- `password <pwd>` - Set server password
+- `motd <text>` - Set message of the day
+- `exit` - Shutdown server (with confirmation)
 
 ## Development
 
 ### Building from Source
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/Ogur.Terraria.Manager.git
+git clone https://github.com/ishkabar/Ogur.Terraria.Manager.git
 cd Ogur.Terraria.Manager
 
 # Restore dependencies
 dotnet restore
 
 # Build
-dotnet build
+dotnet build -c Release
 
 # Run
-dotnet run --project Ogur.Terraria.Manager
+dotnet run
 ```
 
 ### Project Structure
 
-- **Core**: Domain models and business logic
-- **Infrastructure**: Services, configuration, and external integrations
-- **Devexpress**: UI layer with ViewModels and Views
-- Clean architecture with dependency injection throughout
+- **Core**: Domain models (ServerCommand, ServerStatus)
+- **Infrastructure**: Services (SSH, Hub, Navigation, Settings)
+- **Devexpress**: UI layer (ViewModels, Views, Converters)
+- Clean architecture with DI throughout
+
+### Dependencies
+```xml
+<PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+<PackageReference Include="DevExpress.Wpf.Themes.Office2019Colorful" Version="24.1.6" />
+<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
+<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
+<PackageReference Include="Renci.SshNet" Version="2024.2.0" />
+```
 
 ## License
 
-[Your License Here]
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## Support
-
-For issues and questions, please open an issue on GitHub.
+Proprietary - All rights reserved © 2025 Dominik Karczewski (ogur.dev)
 
 ## Acknowledgments
 
-- Terraria Server Docker Image: [beardedio/terraria](https://hub.docker.com/r/beardedio/terraria)
-- SSH.NET Library: [sshnet/SSH.NET](https://github.com/sshnet/SSH.NET)
-- DevExpress WPF Components
+- **Terraria Docker Image**: [beardedio/terraria](https://hub.docker.com/r/beardedio/terraria)
+- **SSH.NET Library**: [sshnet/SSH.NET](https://github.com/sshnet/SSH.NET)
+- **DevExpress WPF**: Professional UI components
+
+## Author
+
+**Dominik Karczewski**
+- Website: [ogur.dev](https://ogur.dev)
+- GitHub: [@ishkabar](https://github.com/ishkabar)
